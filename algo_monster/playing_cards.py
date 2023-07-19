@@ -67,6 +67,7 @@ class JokerCard(Card):
 class Game:
     def __init__(self):
         self.deck: list[Card] = []
+        self.hands: list[list[Card]] = []
 
     def add_card(self, suit: str, value: str) -> None:
         self.deck.append(PlayingCard(suit, value))
@@ -80,21 +81,55 @@ class Game:
     def card_beats(self, card_a: int, card_b: int) -> bool:
         return self.deck[card_a] > self.deck[card_b]
 
+    def add_hand(self, card_indices: list[int]) -> None:
+        current_hand = [self.deck[index] for index in card_indices]
+        self.hands.append(current_hand)
 
-""" 
-- Enums for Suits (class)
-- keep track of cards being created (var)
-- string representation of each card ( like a description ) func()
--  
+    def hand_string(self, hand: int) -> str:
+        card_descriptions = []
+        for card in self.hands[hand]:
+            card_descriptions.append(card.describe())
+        return ", ".join(card_descriptions)
 
- """
+    def hand_beats(self, hand_a: int, hand_b: int) -> bool:
+        cards_in_a = sorted(self.hands[hand_a], reverse=True)
+        cards_in_b = sorted(self.hands[hand_b], reverse=True)
+
+        a_pointer = b_pointer = 0
+        n, m = len(cards_in_a), len(cards_in_b)
+
+        while a_pointer < n and b_pointer < m:
+            value_a = cards_in_a[a_pointer].card_value
+            value_b = cards_in_b[b_pointer].card_value
+
+            print(value_a)
+            print(value_b)
+
+            if value_a == value_b:
+                a_pointer += 1
+                b_pointer += 1
+            elif value_a > value_b:
+                return True
+            else:
+                return False
+
 
 if __name__ == "__main__":
     game = Game()
-    suit, value = input().split()
-    game.add_card(suit, value)
-    print(game.card_string(0))
-    suit, value = input().split()
-    game.add_card(suit, value)
-    print(game.card_string(1))
-    print("true" if game.card_beats(0, 1) else "false")
+    hand_a_list = []
+    n_1 = int(input())
+    for i in range(n_1):
+        suit, value = input().split()
+        game.add_joker(value) if suit == "Joker" else game.add_card(suit, value)
+        hand_a_list.append(i)
+    game.add_hand(hand_a_list)
+    print(game.hand_string(0))
+    hand_b_list = []
+    n_2 = int(input())
+    for i in range(n_1, n_1 + n_2):
+        suit, value = input().split()
+        game.add_joker(value) if suit == "Joker" else game.add_card(suit, value)
+        hand_b_list.append(i)
+    game.add_hand(hand_b_list)
+    print(game.hand_string(1))
+    print("true" if game.hand_beats(0, 1) else "false")
